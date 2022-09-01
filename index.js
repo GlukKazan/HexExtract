@@ -11,14 +11,17 @@ function done() {
     proceed = false;
 }
 
-async function load(url) {
+async function load(url, i) {
     let promise = new Promise((resolve, reject) => {
         axios.get(url)
         .then(function (response) {
             if (response.data.length > 0) {
-                const r = response.data.match(/Std moves:\s*([^\s<-]+)/);
-                if (r) {
-                    console.log(r[1]);
+                const sz = response.data.match(/size-(\d+)\s+board/); 
+                if (sz) {
+                    const r = response.data.match(/Std moves:\s*([^\s<-]+)/);
+                    if (r) {
+                        console.log(i + '[' + sz[1] + ']: ' + r[1]);
+                    }
                 }
             }
             resolve();
@@ -33,7 +36,7 @@ async function load(url) {
 
 async function loadAll(callback) {
     for (let i = 1; i <= MAX; i++) {
-        await load(URL + i);
+        await load(URL + i, i);
     }
     callback();
 }
