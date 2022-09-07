@@ -1,15 +1,11 @@
 "use strict";
 
 const axios = require('axios');
+const fs = require('fs'); 
+const readline = require('readline'); 
 
 const URL = 'http://hex.kosmanor.com/hex-bin/newdump/';
 const MAX = 966989;
-
-let proceed = true;
-
-function done() {
-    proceed = false;
-}
 
 async function load(url, i) {
     let promise = new Promise((resolve, reject) => {
@@ -34,22 +30,24 @@ async function load(url, i) {
     await promise;
 }
 
-async function loadAll(callback) {
+async function loadAll() {
     for (let i = 1; i <= MAX; i++) {
         await load(URL + i, i);
     }
-    callback();
 }
 
-function exec() {
-    if (proceed) {
-        setTimeout(exec, 1000);
+async function loadFile(name) {
+    const rl = readline.createInterface({
+        input: fs.createReadStream(name), 
+        console: false 
+    });
+    for await (const line of rl) {
+        await load(URL + line, line);
     }
 }
-
-function run() {
-    loadAll(done);
-    exec();
+    
+async function run() {
+    await loadFile('discard.txt');
 }
 
-run();
+(async () => { await run(); })();
